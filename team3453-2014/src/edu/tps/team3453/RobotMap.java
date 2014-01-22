@@ -10,21 +10,26 @@ public class RobotMap {
     // following variables to use with your drivetrain subsystem.
     // public static final int leftMotor = 1;
     // public static final int rightMotor = 2;
+    
+    // DSC has 10 PWM/Servo, 14 DIO, 8 Relay/Spike input/outputs
+    
     //PWM
-    
-    
     public static final int leftFrontDriveMotor = 1;
     public static final int leftRearDriveMotor = 5;
     public static final int rightFrontDriveMotor = 4;
     public static final int rightRearDriveMotor = 8;
-    public static final int rightArm = 6;
-    public static final int leftArm = 7;
-    public static final int panServoInput = 2;
+    
+    public static final int topRollerMotor = 2;
+    public static final int topRollerArmMotor = 6;
+    
+    public static final int panServoInput = 7;
     public static final int tiltServoInput = 3;
     
      //   leftEncoder = new Encoder(7,8);
      //   rightEncoder = new Encoder(5,6);
     //DIO
+    public static final int limitSwitchTopRollerArmReach = 1;
+    public static final int limitSwitchTopRollerArmPull = 2;
     public static final int leftDriveEncoderA = 7;
     public static final int leftDriveEncoderB = 8;
     public static final int rightDriveEncoderA = 5;
