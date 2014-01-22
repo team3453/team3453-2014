@@ -1,24 +1,9 @@
 
 package edu.tps.team3453;
 
-import edu.tps.team3453.commands.ArmDoNothing;
-import edu.tps.team3453.commands.ArmJoystickControl;
-import edu.tps.team3453.commands.DumperArmBack;
-import edu.tps.team3453.commands.DumperArmForward;
-import edu.tps.team3453.commands.LidClose;
-import edu.tps.team3453.commands.LidOpen;
 import edu.tps.team3453.commands.CameraPyramidApproach;
-import edu.tps.team3453.commands.SolenoidLock;
-import edu.tps.team3453.commands.SolenoidUnlock;
 import edu.tps.team3453.commands.CameraWhileOnPyramid;
-import edu.tps.team3453.commands.ArmPull;
-import edu.tps.team3453.commands.ArmReach;
 
-import edu.tps.team3453.commands.ClimberChassisBackward;
-import edu.tps.team3453.commands.ClimberChassisForward;
-import edu.tps.team3453.commands.ClimberChassisJoystickControl;
-import edu.tps.team3453.commands.LeftArmDown5;
-import edu.tps.team3453.commands.LeftArmUp5;
 import edu.tps.team3453.commands.LeftMotorAt10;
 import edu.tps.team3453.commands.LeftMotorAt12;
 import edu.tps.team3453.commands.LeftMotorAt15;
@@ -28,27 +13,15 @@ import edu.tps.team3453.commands.LeftMotorUp5;
 
 import edu.tps.team3453.commands.LeftCameraFreeControl;
 import edu.tps.team3453.commands.RightCameraFreeControl;
-import edu.tps.team3453.commands.ClimberChassisBackward;
-import edu.tps.team3453.commands.ClimberChassisForward;
-import edu.tps.team3453.commands.ClimberChassisJoystickControl;
 import edu.tps.team3453.commands.DriveTeleop;
-import edu.tps.team3453.commands.KillSwitch;
-import edu.tps.team3453.commands.LeftArmJoystickControl;
 
 import edu.tps.team3453.commands.PanServoClockwise;
 import edu.tps.team3453.commands.PanServoCounterClockwise;
 
-import edu.tps.team3453.commands.RearWheelExtend;
-import edu.tps.team3453.commands.RearWheelRetract;
-import edu.tps.team3453.commands.RightArmDown5;
-import edu.tps.team3453.commands.RightArmUp5;
-import edu.tps.team3453.commands.RunArmsAtCurrent;
 import edu.tps.team3453.commands.TiltServoClockwise;
 import edu.tps.team3453.commands.TiltServoCounterClockwise;
 
 import edu.tps.team3453.commands.TestLimitSwitchTesting;
-import edu.tps.team3453.commands.RearWheelJoystickControl;
-import edu.tps.team3453.commands.RightArmJoystickControl;
 
 import edu.tps.team3453.commands.setTeleopDriveForward;
 import edu.tps.team3453.commands.setTeleopDriveReverse;
@@ -124,14 +97,7 @@ public class OI {
         // Dumper
         // Lid 
         joystick2b1.whenPressed(new CameraWhileOnPyramid());
-        joystick2b2.whenPressed(new KillSwitch());
-        joystick2b3.whenPressed(new KillSwitch());
-        joystick2b4.whenPressed(new ArmJoystickControl());
         joystick2b5.whenPressed(new RightCameraFreeControl());
-        joystick2b6.whenPressed(new ClimberChassisJoystickControl());
-        joystick2b7.whenPressed(new RearWheelJoystickControl());
-        joystick2b8.whenPressed(new LeftArmJoystickControl());
-        joystick2b9.whenPressed(new RightArmJoystickControl());
         
 /* For Testing only        
         b6.whenPressed(new DumperArmForward());
