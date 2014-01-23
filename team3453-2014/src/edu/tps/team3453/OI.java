@@ -1,6 +1,7 @@
 
 package edu.tps.team3453;
 
+import edu.tps.team3453.RobotMap;
 import edu.tps.team3453.commands.CameraPyramidApproach;
 import edu.tps.team3453.commands.CameraWhileOnPyramid;
 
@@ -14,6 +15,7 @@ import edu.tps.team3453.commands.LeftMotorUp5;
 import edu.tps.team3453.commands.LeftCameraFreeControl;
 import edu.tps.team3453.commands.RightCameraFreeControl;
 import edu.tps.team3453.commands.DriveTeleop;
+import edu.tps.team3453.commands.TopRollerTeleop;
 
 import edu.tps.team3453.commands.PanServoClockwise;
 import edu.tps.team3453.commands.PanServoCounterClockwise;
@@ -38,8 +40,8 @@ import edu.wpi.first.wpilibj.buttons.JoystickButton;
  * interface to the commands and command groups that allow control of the robot.
  */
 public class OI {
-    public static Joystick joystick = new Joystick(1);
-    public static Joystick joystick2 = new Joystick(2);
+    public static Joystick joystick = new Joystick(RobotMap.leftJoystick);
+    public static Joystick joystick2 = new Joystick(RobotMap.rightJoystick);
     Button b1 = new JoystickButton (joystick, 1);
     Button b2 = new JoystickButton (joystick, 2);
     Button b3 = new JoystickButton (joystick, 3);

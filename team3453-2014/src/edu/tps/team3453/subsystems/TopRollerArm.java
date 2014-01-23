@@ -29,6 +29,11 @@ public class TopRollerArm extends Subsystem {
         setDefaultCommand(new TopRollerArmDoNothing());
     }
     
+    public void setMotor(double speed) {
+        // should use limitswitch to stop the setting of the motor here.
+        topRollerArm.set(speed);
+    }
+    
     public void stop() {
         topRollerArm.set(0);
     }

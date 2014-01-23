@@ -7,8 +7,6 @@ package edu.tps.team3453.subsystems;
 
 import edu.tps.team3453.RobotMap;
 import edu.tps.team3453.commands.TopRollerDoNothing;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -27,6 +25,10 @@ public class TopRoller extends Subsystem {
         // Set the default command for a subsystem here.
         //setDefaultCommand(new MySpecialCommand());
         setDefaultCommand(new TopRollerDoNothing());
+    }
+    
+    public void setMotor(double speed) {
+        topRoller.set(speed);
     }
     
     public void stop() {
