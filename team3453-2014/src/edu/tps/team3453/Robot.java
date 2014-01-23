@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import edu.tps.team3453.commands.AutonomousDrive;
 import edu.tps.team3453.commands.AutoDriveFreeFwd;
+import edu.tps.team3453.commands.TeleopCommandGroup;
 
 
 /**
@@ -39,7 +40,7 @@ public class Robot extends IterativeRobot {
     public void robotInit() {
         // instantiate the command used for the autonomous period
         autonomousCommand = new AutonomousDrive(14400);
-        teleopCommand = new DriveTeleop();
+        teleopCommand = new TeleopCommandGroup();
         // Initialize all subsystems
         CommandBase.init();
     }
