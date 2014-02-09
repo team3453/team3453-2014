@@ -30,8 +30,19 @@ public class TopRollerArm extends Subsystem {
     }
     
     public void setMotor(double speed) {
-        // should use limitswitch to stop the setting of the motor here.
-        topRollerArm.set(speed);
+        // should use limitswitch to stop the setting of the motor here
+
+        if ((speed > 0) && (limitSwitchTopRollerArmPull.get())) {
+            // pulling on the joystick and reached limit
+            stop();
+            
+        } else if ((speed < 0) && (limitSwitchTopRollerArmReach.get())) {
+            // pushing on the joystick and reached limit
+            stop();
+            
+        } else {
+            topRollerArm.set(speed);
+        }
     }
     
     public void stop() {

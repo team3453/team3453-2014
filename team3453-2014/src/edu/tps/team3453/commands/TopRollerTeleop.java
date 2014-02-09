@@ -5,9 +5,10 @@
  */
 package edu.tps.team3453.commands;
 
-import edu.tps.team3453.OI;
 import edu.tps.team3453.RobotMap;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.buttons.Button;
+import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
 /**
  *
@@ -16,8 +17,11 @@ import edu.wpi.first.wpilibj.Joystick;
 public class TopRollerTeleop extends CommandBase {
     
     private Joystick stick;
+    private Button bsuck;
+    private Button bspit;
     private double yVal;    
     private double tVal;
+    private boolean rollerOn = false;
     
     public TopRollerTeleop() {
         // Use requires() here to declare subsystem dependencies
@@ -30,6 +34,8 @@ public class TopRollerTeleop extends CommandBase {
     // Called just before this Command runs the first time
     protected void initialize() {
         stick = new Joystick(RobotMap.rightJoystick);
+        bsuck = new JoystickButton (stick, 1);
+        bspit = new JoystickButton (stick, 2);        
         
         System.out.println("TopRollerTeleop is executing");
     }
@@ -51,6 +57,16 @@ public class TopRollerTeleop extends CommandBase {
             topRoller.stop();
         }
     
+        if ((bsuck.get() && bspit.get())) {
+            topRoller.stop();
+        } else {
+            if (bsuck.get()) {
+                topRoller.setMotor(1.0);
+            }
+            if (bspit.get()) {
+                topRoller.setMotor(-1.0);
+            }
+        }
     }
 
     // Make this return true when this Command no longer needs to run execute()
