@@ -28,8 +28,10 @@ public class RobotMap {
      //   leftEncoder = new Encoder(7,8);
      //   rightEncoder = new Encoder(5,6);
     //DIO
-    public static final int limitSwitchTopRollerArmReach = 1;
-    public static final int limitSwitchTopRollerArmPull = 2;
+    // currently the backward limit
+    public static final int limitSwitchTopRollerArmPull = 1;
+    // currently the forward limit
+    public static final int limitSwitchTopRollerArmReach = 2;
     public static final int leftDriveEncoderA = 7;
     public static final int leftDriveEncoderB = 8;
     public static final int rightDriveEncoderA = 5;
