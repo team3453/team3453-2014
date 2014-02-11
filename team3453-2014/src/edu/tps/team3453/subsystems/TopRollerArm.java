@@ -41,7 +41,7 @@ public class TopRollerArm extends Subsystem {
             stop();
             
         } else {
-            topRollerArm.set(speed);
+            topRollerArm.set( 0.7 * speed); 
         }
     }
     
