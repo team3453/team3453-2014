@@ -9,7 +9,6 @@ package edu.tps.team3453;
 
 
 import edu.tps.team3453.commands.CommandBase;
-import edu.tps.team3453.commands.DriveTeleop;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Command;
@@ -17,8 +16,7 @@ import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import edu.tps.team3453.commands.AutonomousDrive;
-import edu.tps.team3453.commands.AutoDriveFreeFwd;
+import edu.tps.team3453.commands.AutonomousCommandGroup;
 import edu.tps.team3453.commands.TeleopCommandGroup;
 
 
@@ -39,7 +37,7 @@ public class Robot extends IterativeRobot {
      */
     public void robotInit() {
         // instantiate the command used for the autonomous period
-        autonomousCommand = new AutonomousDrive(14400);
+        autonomousCommand = new AutonomousCommandGroup();
         teleopCommand = new TeleopCommandGroup();
         // Initialize all subsystems
         CommandBase.init();
