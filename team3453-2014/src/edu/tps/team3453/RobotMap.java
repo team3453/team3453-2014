@@ -46,6 +46,9 @@ public class RobotMap {
     public static final int leftArmEncoderA = 11;
     public static final int leftArmEncoderB = 12;
     
+    // Analog Input
+    public static final int rollerArmPot = 1;
+    
     //Second DSC
     public static final int limitSwitchRearWheelExtend = 1;
     public static final int limitSwitchRearWheelPolePosition = 2;
