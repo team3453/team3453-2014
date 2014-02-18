@@ -35,6 +35,7 @@ public class TopRollerArm extends PIDSubsystem {
     private double outerlowerlimit;     // start slowing down motor at lowerupperlimit
     private double currentOutput;
     
+    private boolean stopped = true;
     private boolean enabled = false;
     
     private final double rollerArmSetPtStow = 115.0;
@@ -91,21 +92,25 @@ public class TopRollerArm extends PIDSubsystem {
     //  postive value moves arm forward
     //  negative value moves arm backward
     public void setMotor(double speed) {
-       
+        
+        System.out.println("Calling setMotor: "+speed);
         currentOutput = speed;
         
         // should use limitswitch to stop the setting of the motor here
         
-        if (isOnTarget()) {
+        if (isEnabled() && isOnTarget()) {
+            System.out.println("We are onTarget");
             off();
         }
 
         if ((speed < 0) && (limitSwitchTopRollerArmPull.get())) {
             // pulling on the joystick and reached limit
+            System.out.println("Hit Pull limit");
             stop();
             
         } else if ((speed > 0) && (limitSwitchTopRollerArmReach.get())) {
             // pushing on the joystick and reached limit
+            System.out.println("Hit Reach limit");
             stop();
             
         } else {
@@ -114,6 +119,7 @@ public class TopRollerArm extends PIDSubsystem {
                 //   is within outer limits, i.e. 3 * targetTolerance
                 double currentPos = returnPIDInput();
                 if ((currentPos > outerlowerlimit) && (currentPos < outerupperlimit)) {
+                    System.out.println("Within outer limits, slowing to 0.5");
                     if (speed > 0) {
                         speed = 0.5;
                     } else if (speed < 0) {
@@ -123,6 +129,11 @@ public class TopRollerArm extends PIDSubsystem {
             }
             // physical positive value to topRollerArm.set pulls arm backwards
             // physical negative value to topRollerArm.set pushes arm forward
+            if (speed == 0) {
+                setStopped(true);
+            } else {
+                setStopped(false);
+            }
             topRollerArm.set( -1 * 0.7 * speed); 
         }
         
@@ -130,14 +141,26 @@ public class TopRollerArm extends PIDSubsystem {
     }
     
     public void stop() {
+        System.out.println("Called stop");
         topRollerArm.set(0);
+        setStopped(true);
     }
 
     // disable PID and stop the motors
     public void off() {
+        System.out.println("Called off");
         setEnabled(false);
-        setMotor(0);
+        stop();
+        setStopped(true);
     }    
+    
+    public void setStopped(boolean k) {
+        stopped = k;
+    }
+    
+    public boolean isStopped() {
+        return stopped;
+    }
     
     protected double returnPIDInput() {
         return rollerArmPot.pidGet();
@@ -145,7 +168,10 @@ public class TopRollerArm extends PIDSubsystem {
     }
 
     protected void usePIDOutput(double p) {
-        setMotor(p);
+        System.out.println("usePIDOutput: "+p);
+        if (p != 0) {
+            setMotor(p);
+        }
 //        throw new java.lang.UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

@@ -70,11 +70,12 @@ public class TopRollerTeleop extends CommandBase {
             //   postive input into .setMotor moves motor forward
             //   negative input into .setMotor moves motor backward
             topRollerArm.setMotor( -1 * yVal);
+            
             operatorControl = true;
         } else {
-            if (!topRollerArm.isEnabled()) {
+            if (!topRollerArm.isStopped() && !topRollerArm.isEnabled()) {
                 // stop the topRollerArm when operator control is neutral
-                //   only if topRollerArm PID is disabled
+                //   only if the motor is running and topRollerArm PID is disabled
                 topRollerArm.stop();
             }
         }
@@ -107,9 +108,10 @@ public class TopRollerTeleop extends CommandBase {
         } else {
             if (bsuck.get()) {
                 topRoller.setMotor(1.0);
-            }
-            if (bspit.get()) {
+            } else if (bspit.get()) {
                 topRoller.setMotor(-1.0);
+            } else {
+//                topRoller.stop();
             }
         }
         
