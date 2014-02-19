@@ -38,10 +38,10 @@ public class TopRollerArm extends PIDSubsystem {
     private boolean stopped = true;
     private boolean enabled = false;
     
-    private final double rollerArmSetPtStow = 115.0;
-    private final double rollerArmSetPtUpRight = 345.0;
-    private final double rollerArmSetPtSuck = 650.0;
-    private final double rollerArmSetPtDown = 810.0;
+    private final double rollerArmSetPtStow = 40.0;
+    private final double rollerArmSetPtUpRight = 285.0;
+    private final double rollerArmSetPtSuck = 550.0;
+    private final double rollerArmSetPtDown = 970.0;
     
     // Put methods for controlling this subsystem
     // here. Call these from Commands.

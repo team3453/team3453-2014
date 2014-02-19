@@ -49,6 +49,11 @@ public class RobotMap {
     // Analog Input
     public static final int rollerArmPot = 1;
     
+    //relay
+    public static final int ledLighStrip = 1;
+    public static final int trigger1 = 2;
+    public static final int trigger2 = 3;
+    
     //Second DSC
     public static final int limitSwitchRearWheelExtend = 1;
     public static final int limitSwitchRearWheelPolePosition = 2;
