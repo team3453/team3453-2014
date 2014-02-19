@@ -52,6 +52,11 @@ public class TopRollerTeleop extends CommandBase {
         
         boolean operatorControl = false;
         
+        if (topRollerArm.isEnabled() && topRollerArm.isOnTarget()) {
+            System.out.println("TopRollerArm is onTarget");
+            topRollerArm.off();
+        }
+        
         if ((yVal >= .150) || (yVal <= -.150)) {
             // multiply the joystick position by -1 to reverse 
             //  to fit motor power input

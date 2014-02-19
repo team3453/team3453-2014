@@ -134,7 +134,8 @@ public class TopRollerArm extends PIDSubsystem {
             } else {
                 setStopped(false);
             }
-            topRollerArm.set( -1 * 0.7 * speed); 
+            topRollerArm.set( -1 * 0.7 * speed);
+            currentOutput = speed * -1 * 0.7;
         }
         
 //        updateStatus();
@@ -143,6 +144,7 @@ public class TopRollerArm extends PIDSubsystem {
     public void stop() {
         System.out.println("Called stop");
         topRollerArm.set(0);
+        currentOutput = 0;
         setStopped(true);
     }
 
