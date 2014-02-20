@@ -57,6 +57,10 @@ public class TopRollerTeleop extends CommandBase {
             topRollerArm.off();
         }
         
+        // Throttle reading is -1 on fulltop and +1 on fullbottom
+        //   have to invert and scale to 0-1 before sending to call
+        topRollerArm.setManualPower(((-1*stick.getZ()) +1 ) /2);
+        
         if ((yVal >= .150) || (yVal <= -.150)) {
             // multiply the joystick position by -1 to reverse 
             //  to fit motor power input

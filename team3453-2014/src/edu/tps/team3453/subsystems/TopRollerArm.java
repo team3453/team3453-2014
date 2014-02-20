@@ -37,8 +37,9 @@ public class TopRollerArm extends PIDSubsystem {
     
     private boolean stopped = true;
     private boolean enabled = false;
+    private double manualPower = 0.7;
     
-    private final double rollerArmSetPtStow = 40.0;
+    private final double rollerArmSetPtStow = 43.0;
     private final double rollerArmSetPtUpRight = 285.0;
     private final double rollerArmSetPtSuck = 550.0;
     private final double rollerArmSetPtDown = 970.0;
@@ -88,6 +89,12 @@ public class TopRollerArm extends PIDSubsystem {
         }
     }
     
+    public void setManualPower (double p) {
+        manualPower = p * 0.7;
+        if (manualPower < 0.2) {
+            manualPower = 0.2;
+        }
+    }
     // speed input into setMotor
     //  postive value moves arm forward
     //  negative value moves arm backward
@@ -134,8 +141,8 @@ public class TopRollerArm extends PIDSubsystem {
             } else {
                 setStopped(false);
             }
-            topRollerArm.set( -1 * 0.7 * speed);
-            currentOutput = speed * -1 * 0.7;
+            topRollerArm.set( -1 * manualPower * speed);
+            currentOutput = speed * -1 * manualPower;
         }
         
 //        updateStatus();
