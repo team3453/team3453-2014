@@ -22,6 +22,9 @@ public class RobotMap {
     public static final int topRollerMotor = 2;
     public static final int topRollerArmMotor = 6;
     
+    public static final int catapultMotor1 = 3;
+    public static final int catapultMotor2 = 7;
+    
     public static final int panServoInput = 7;
     public static final int tiltServoInput = 3;
     
@@ -32,6 +35,9 @@ public class RobotMap {
     public static final int limitSwitchTopRollerArmPull = 1;
     // currently the forward limit
     public static final int limitSwitchTopRollerArmReach = 2;
+    
+    public static final int limitSwitchCatapultLatch = 6;
+    
     public static final int leftDriveEncoderA = 7;
     public static final int leftDriveEncoderB = 8;
     public static final int rightDriveEncoderA = 5;
@@ -50,9 +56,10 @@ public class RobotMap {
     public static final int rollerArmPot = 1;
     
     //relay
-    public static final int ledLighStrip = 1;
-    public static final int trigger1 = 2;
-    public static final int trigger2 = 3;
+    public static final int catapultSolenoid = 1;
+    public static final int lightSolenoid = 2;
+    public static final int ledLighStrip = 6;
+
     
     //Second DSC
     public static final int limitSwitchRearWheelExtend = 1;

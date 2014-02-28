@@ -3,6 +3,7 @@ package edu.tps.team3453.commands;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.tps.team3453.OI;
+import edu.tps.team3453.subsystems.Catapult;
 import edu.tps.team3453.subsystems.LEDLightStrip;
 import edu.tps.team3453.subsystems.LeftDriveMotor;
 import edu.tps.team3453.subsystems.RightDriveMotor;
@@ -29,6 +30,7 @@ public abstract class CommandBase extends Command {
     public static final LEDLightStrip ledLightStrip = new LEDLightStrip();
     public static final TopRoller topRoller = new TopRoller();
     public static final TopRollerArm topRollerArm = new TopRollerArm();
+    public static final Catapult catapult = new Catapult();
     public static final TiltServo tiltServo = new TiltServo();
     public static final PanServo panServo = new PanServo();
     public static final LeftJoystickToken leftJoystickToken = new LeftJoystickToken();

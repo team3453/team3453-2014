@@ -18,6 +18,10 @@ public class LEDLightStrip extends Subsystem {
     // Put methods for controlling this subsystem
     // here. Call these from Commands.
     private static final Relay light = new Relay(RobotMap.ledLighStrip);
+    
+    public LEDLightStrip() {
+        light.setDirection(Relay.Direction.kForward);
+    }
 
     public void initDefaultCommand() {
         // Set the default command for a subsystem here.
