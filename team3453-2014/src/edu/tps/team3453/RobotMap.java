@@ -37,6 +37,7 @@ public class RobotMap {
     public static final int limitSwitchTopRollerArmReach = 2;
     
     public static final int limitSwitchCatapultLatch = 6;
+    public static final int limitSwitchCatapultDown = 7;
     
     public static final int leftDriveEncoderA = 7;
     public static final int leftDriveEncoderB = 8;

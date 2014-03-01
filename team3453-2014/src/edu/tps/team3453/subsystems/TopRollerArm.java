@@ -35,6 +35,8 @@ public class TopRollerArm extends PIDSubsystem {
     private double outerlowerlimit;     // start slowing down motor at lowerupperlimit
     private double currentOutput;
     
+    private State currentState;
+    private Catapult.State catapultState;
     private boolean stopped = true;
     private boolean enabled = false;
     private double manualPower = 0.7;
@@ -50,7 +52,23 @@ public class TopRollerArm extends PIDSubsystem {
     private static final DigitalInput limitSwitchTopRollerArmReach = new DigitalInput(RobotMap.limitSwitchTopRollerArmReach);
     private static final DigitalInput limitSwitchTopRollerArmPull = new DigitalInput(RobotMap.limitSwitchTopRollerArmPull);
     private static final AnalogChannel rollerArmPot = new AnalogChannel(RobotMap.rollerArmPot);
-    
+
+    public static class State {
+
+        public final int state;
+        static final int kDanger_val = 0;
+        static final int kSafe_val = 1;
+        static final int kReady_val = 2;
+
+        public static final State kDanger = new State(kDanger_val);
+        public static final State kSafe = new State(kSafe_val);
+        public static final State kReady = new State(kReady_val);
+
+        private State (int state) {
+            this.state = state;
+        }
+    }
+        
     // Initialize your subsystem here
     public TopRollerArm() {
         super("TopRollerArm", Kp, Ki, Kd, Kf);
@@ -74,6 +92,33 @@ public class TopRollerArm extends PIDSubsystem {
         // Set the default command for a subsystem here.
         //setDefaultCommand(new MySpecialCommand());
         setDefaultCommand(new TopRollerArmDoNothing());
+    }
+    
+    public void setState (State state) {
+        currentState = state;
+    }
+    
+    public State setState () {
+        double currentPos = returnPIDInput();
+        if (currentPos < 0) {
+            // no reading, pot is offline
+            setState(State.kDanger);
+        } else if (currentPos <= 350 ) {
+            setState(State.kDanger);
+        } else if (currentPos >= 900) {
+            setState(State.kReady);
+        } else {
+            setState(State.kSafe);
+        }
+        return (currentState);
+    }
+    
+    public State getState () {
+        return currentState;
+    }    
+    
+    public void setCatapultState (Catapult.State state) {
+        this.catapultState = state;
     }
     
     public boolean isEnabled() {
@@ -102,6 +147,13 @@ public class TopRollerArm extends PIDSubsystem {
         
         System.out.println("Calling setMotor: "+speed);
         currentOutput = speed;
+        if (setState().equals(State.kDanger)) {
+            if (!catapultState.equals(Catapult.State.kReady)) {
+                if (!catapultState.equals(Catapult.State.kOVERRIDE)) {
+                    off();
+                }
+            } 
+        }
         
         // should use limitswitch to stop the setting of the motor here
         

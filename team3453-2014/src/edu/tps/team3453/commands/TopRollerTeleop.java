@@ -22,6 +22,9 @@ public class TopRollerTeleop extends CommandBase {
     private Button bspit;
     private Button bSetPtAdvance;
     private Button bSetPtBackup;
+    private Button boverride;
+    private Button bFire1;
+    private Button bFire2;
     private double yVal;    
     private double tVal;
     private boolean rollerOn = false;
@@ -31,6 +34,7 @@ public class TopRollerTeleop extends CommandBase {
         // eg. requires(chassis);
         requires(topRoller);
         requires(topRollerArm);
+        requires(catapult);
         requires(rightJoystickToken);
     }
 
@@ -38,7 +42,10 @@ public class TopRollerTeleop extends CommandBase {
     protected void initialize() {
         stick = new Joystick(RobotMap.rightJoystick);
         bsuck = new JoystickButton (stick, RobotValues.bsuck);
-        bspit = new JoystickButton (stick, RobotValues.bspit);  
+        bspit = new JoystickButton (stick, RobotValues.bspit); 
+        boverride = new JoystickButton (stick, RobotValues.bArmCatapultOverRide);
+        bFire1 = new JoystickButton (stick, RobotValues.bCatapultFire1);
+        bFire2 = new JoystickButton (stick, RobotValues.bCatapultFire2);
         bSetPtAdvance = new JoystickButton (stick, RobotValues.bSetPtAdvance);
         bSetPtBackup = new JoystickButton (stick, RobotValues.bSetPtBackup);
         
@@ -56,6 +63,21 @@ public class TopRollerTeleop extends CommandBase {
             System.out.println("TopRollerArm is onTarget");
             topRollerArm.off();
         }
+
+        // resolve conflict states
+        topRollerArm.setCatapultState(catapult.getState());
+        catapult.setRollerArmState(topRollerArm.setState());
+        
+        if (boverride.get()) {
+            catapult.requestOverride();
+            topRollerArm.setCatapultState(catapult.getState());
+        }
+        
+        if (bFire1.get() || bFire2.get()) {
+            catapult.requestFireState();
+        }
+        
+        catapult.dispatch();
         
         // Throttle reading is -1 on fulltop and +1 on fullbottom
         //   have to invert and scale to 0-1 before sending to call
