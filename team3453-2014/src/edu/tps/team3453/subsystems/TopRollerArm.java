@@ -40,6 +40,7 @@ public class TopRollerArm extends PIDSubsystem {
     private boolean stopped = true;
     private boolean enabled = false;
     private double manualPower = 0.7;
+    private final double minMotorPower = 0.3;
     
     private final double rollerArmSetPtStow = 43.0;
     private final double rollerArmSetPtUpRight = 285.0;
@@ -173,10 +174,12 @@ public class TopRollerArm extends PIDSubsystem {
             stop();
             
         } else {
+            double currentPos = returnPIDInput();
+            
             if (isEnabled()) {
                 // adjust motor speed to less than 0.5 once the arm
                 //   is within outer limits, i.e. 3 * targetTolerance
-                double currentPos = returnPIDInput();
+
                 if ((currentPos > outerlowerlimit) && (currentPos < outerupperlimit)) {
                     System.out.println("Within outer limits, slowing to 0.5");
                     if (speed > 0) {
@@ -185,6 +188,11 @@ public class TopRollerArm extends PIDSubsystem {
                         speed = -0.5;
                     }
                 }
+            }
+            
+            if ((speed < 0) && (currentPos < 80)) {
+                // pulling arm back and we should slow down before the hard stop
+                speed = minMotorPower;
             }
             // physical positive value to topRollerArm.set pulls arm backwards
             // physical negative value to topRollerArm.set pushes arm forward
