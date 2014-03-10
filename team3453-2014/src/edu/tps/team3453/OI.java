@@ -64,6 +64,11 @@ public class OI {
     Button joystick2b8 = new JoystickButton (joystick2, 8);
     Button joystick2b9 = new JoystickButton (joystick2, 9);
     Button joystick2b10 = new JoystickButton (joystick2, 10);
+    
+    /* for Logitech Attack 3 joystick layout
+    b1 is trigger
+    getZ or getRawAxis(3) for throttle
+    */
 
     public OI(){
         //b3.whenPressed(new ArmReach());
@@ -76,11 +81,11 @@ public class OI {
         //b1.whenPressed(new CameraPyramidApproach());
         //b2.whenPressed(new KillSwitch());
         //b3.whenPressed(new KillSwitch());
-        b1.whenPressed(new setTeleopDriveForward());
-        b1.whenReleased(new setTeleopDriveReverse());
+//        b1.whenPressed(new setTeleopDriveForward());
+//        b1.whenReleased(new setTeleopDriveReverse());
         
-        b2.whenPressed(new setTeleopDriveSensitiveTrimmed(true));
-        b2.whenReleased(new setTeleopDriveSensitiveTrimmed(false));
+//        b2.whenPressed(new setTeleopDriveSensitiveTrimmed(true));
+//        b2.whenReleased(new setTeleopDriveSensitiveTrimmed(false));
         
         //b4.whenPressed(new DriveTeleop());
         //b5.whenPressed(new LeftCameraFreeControl());
@@ -98,8 +103,8 @@ public class OI {
         // Camera Pyramid
         // Dumper
         // Lid 
-        joystick2b1.whenPressed(new CameraWhileOnPyramid());
-        joystick2b5.whenPressed(new RightCameraFreeControl());
+//        joystick2b1.whenPressed(new CameraWhileOnPyramid());
+//        joystick2b5.whenPressed(new RightCameraFreeControl());
         
 /* For Testing only        
         b6.whenPressed(new DumperArmForward());

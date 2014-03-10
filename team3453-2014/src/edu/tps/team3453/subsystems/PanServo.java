@@ -17,7 +17,7 @@ import edu.tps.team3453.commands.PanServoDoNothing;
  * @author Madeline
  */
 public class PanServo extends Subsystem {
-    Servo servo = new Servo(RobotMap.panServoInput);
+    Servo servo = new Servo(2,RobotMap.panServoInput);
     // Put methods for controlling this subsystem
     // here. Call these from Commands.
 

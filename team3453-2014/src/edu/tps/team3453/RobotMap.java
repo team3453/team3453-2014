@@ -22,18 +22,30 @@ public class RobotMap {
     public static final int topRollerMotor = 2;
     public static final int topRollerArmMotor = 6;
     
+    public static final int catapultMotor1 = 3;
+    public static final int catapultMotor2 = 7;
+    
     public static final int panServoInput = 7;
     public static final int tiltServoInput = 3;
     
      //   leftEncoder = new Encoder(7,8);
      //   rightEncoder = new Encoder(5,6);
     //DIO
-    public static final int limitSwitchTopRollerArmReach = 1;
-    public static final int limitSwitchTopRollerArmPull = 2;
-    public static final int leftDriveEncoderA = 7;
-    public static final int leftDriveEncoderB = 8;
-    public static final int rightDriveEncoderA = 5;
-    public static final int rightDriveEncoderB = 6;
+    // currently the backward limit
+    public static final int limitSwitchTopRollerArmPull = 1;
+    // currently the forward limit
+    public static final int limitSwitchTopRollerArmReach = 2;
+    
+    public static final int limitSwitchCatapultLatch = 5;
+    public static final int limitSwitchCatapultDown = 6;
+    public static final int limitSwitchCatapultGearbox = 7;
+    
+    public static final int catapultRemoved = 9;
+    
+    public static final int leftDriveEncoderA = 11;
+    public static final int leftDriveEncoderB = 12;
+    public static final int rightDriveEncoderA = 13;
+    public static final int rightDriveEncoderB = 14;
     public static final int closeLidLimitSwitch = 1;
     public static final int openLidLimitSwitch = 2;
     //public static final int climberChassisExtendLimitSwitch = 3;
@@ -43,6 +55,15 @@ public class RobotMap {
     public static final int limitSwitchCrashPreventer = 10;
     public static final int leftArmEncoderA = 11;
     public static final int leftArmEncoderB = 12;
+    
+    // Analog Input
+    public static final int rollerArmPot = 1;
+    
+    //relay
+    public static final int catapultSolenoid = 1;
+    public static final int lightSolenoid = 2;
+    public static final int ledLighStrip = 6;
+
     
     //Second DSC
     public static final int limitSwitchRearWheelExtend = 1;

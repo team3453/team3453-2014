@@ -12,6 +12,8 @@ public class AutonomousDrive extends CommandBase {
     // setpoint is the number of encoder ticks to drive to
     double setpoint;
     boolean initrun = true;
+
+    double time = 2.0;
     
     public AutonomousDrive() {
         requires(leftDriveMotor);
@@ -40,6 +42,15 @@ public class AutonomousDrive extends CommandBase {
             leftDriveMotor.enable();
             rightDriveMotor.enable();
             initrun = false;
+            
+//          Added autonomous code here for 2014
+//            leftDriveMotor.off();
+//            rightDriveMotor.off();
+            
+            // Drives robot backwards
+//            leftDriveMotor.powerOn(0.5);
+//            rightDriveMotor.powerOn(-0.5);
+            setTimeout(time);
         }
         leftDriveMotor.updateStatus();
         rightDriveMotor.updateStatus();
@@ -47,6 +58,13 @@ public class AutonomousDrive extends CommandBase {
 
     // Make this return true when this Command no longer needs to run execute()
     protected boolean isFinished() {
+        if (isTimedOut()) {
+            initrun = true;
+            return true;
+        } else {
+            return false;
+        }
+        /* //old 2013 code
         double leftDiff = Math.abs(Math.abs(leftDriveMotor.getEncoder().get()) - setpoint);
         double rightDiff = Math.abs(Math.abs(rightDriveMotor.getEncoder().get()) - setpoint);
         // if either are within half an encoder turn
@@ -56,6 +74,7 @@ public class AutonomousDrive extends CommandBase {
         } else {
             return false;
         }
+                */
     }
 
     // Called once after isFinished returns true
