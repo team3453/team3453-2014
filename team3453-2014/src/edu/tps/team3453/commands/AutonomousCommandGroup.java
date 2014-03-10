@@ -11,9 +11,9 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
  *
  * @author digimo
  */
-public class TeleopCommandGroup extends CommandGroup {
+public class AutonomousCommandGroup extends CommandGroup {
     
-    public TeleopCommandGroup() {
+    public AutonomousCommandGroup() {
         // Add Commands here:
         // e.g. addSequential(new Command1());
         //      addSequential(new Command2());
@@ -30,7 +30,8 @@ public class TeleopCommandGroup extends CommandGroup {
         // a CommandGroup containing them would require both the chassis and the
         // arm.
         addParallel(new LEDLightStripOn());
-        addParallel(new DriveTeleop());
-        addParallel(new TopRollerTeleop());
+        addSequential(new AutonomousDrive(-14400));
+        addSequential(new AutonomousDrive(-14400));
+        addSequential(new AutonomousMechanism());
     }
 }

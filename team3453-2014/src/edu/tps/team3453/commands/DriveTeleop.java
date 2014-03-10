@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.buttons.Button;
+import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
 /**
  *
@@ -26,6 +28,7 @@ public class DriveTeleop extends CommandBase {
     private static boolean driveChanged = false;
     private static boolean driveSensitiveTrimmed = false; 
     Joystick stick;
+    private Button b1;
     
     public DriveTeleop() {
         // Use requires() here to declare subsystem dependencies
@@ -45,6 +48,7 @@ public class DriveTeleop extends CommandBase {
         reverseDrive = new RobotDrive(rightMotor, rightRearMotor, leftMotor, leftRearMotor);
         drive = forwardDrive;
         stick = new Joystick(RobotMap.leftJoystick);
+        b1 = new JoystickButton (stick, 1);
         
         System.out.println("DriveTeleop is executing");
     }
@@ -73,10 +77,22 @@ public class DriveTeleop extends CommandBase {
             driveChanged = false;
             driveMotorsStop();
         }
-        if (driveForward) {
-            drive = forwardDrive;
-        } else {
+
+        if (b1.get()) {
+            // if the trigger is squeezed, drive in reverse
+            if (driveForward) {
+                // stop the motors briefly if we were driving forward previously
+                driveMotorsStop();
+            }
             drive = reverseDrive;
+            driveForward = false;
+        } else {
+            if (!driveForward) {
+                // stop the motors briefly if we were driving in reverse previously
+                driveMotorsStop();
+            }
+            drive = forwardDrive;
+            driveForward = true;
         }
         drive.arcadeDrive(stick,driveSensitiveTrimmed);
     }
