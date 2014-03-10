@@ -35,13 +35,17 @@ public class TopRollerArm extends PIDSubsystem {
     private double outerlowerlimit;     // start slowing down motor at lowerupperlimit
     private double currentOutput;
     
+    private State currentState;
+    private Catapult.State catapultState;
     private boolean stopped = true;
     private boolean enabled = false;
+    private double manualPower = 0.7;
+    private final double minMotorPower = 0.3;
     
-    private final double rollerArmSetPtStow = 115.0;
-    private final double rollerArmSetPtUpRight = 345.0;
-    private final double rollerArmSetPtSuck = 650.0;
-    private final double rollerArmSetPtDown = 810.0;
+    private final double rollerArmSetPtStow = 43.0;
+    private final double rollerArmSetPtUpRight = 285.0;
+    private final double rollerArmSetPtSuck = 550.0;
+    private final double rollerArmSetPtDown = 970.0;
     
     // Put methods for controlling this subsystem
     // here. Call these from Commands.
@@ -49,7 +53,23 @@ public class TopRollerArm extends PIDSubsystem {
     private static final DigitalInput limitSwitchTopRollerArmReach = new DigitalInput(RobotMap.limitSwitchTopRollerArmReach);
     private static final DigitalInput limitSwitchTopRollerArmPull = new DigitalInput(RobotMap.limitSwitchTopRollerArmPull);
     private static final AnalogChannel rollerArmPot = new AnalogChannel(RobotMap.rollerArmPot);
-    
+
+    public static class State {
+
+        public final int state;
+        static final int kDanger_val = 0;
+        static final int kSafe_val = 1;
+        static final int kReady_val = 2;
+
+        public static final State kDanger = new State(kDanger_val);
+        public static final State kSafe = new State(kSafe_val);
+        public static final State kReady = new State(kReady_val);
+
+        private State (int state) {
+            this.state = state;
+        }
+    }
+        
     // Initialize your subsystem here
     public TopRollerArm() {
         super("TopRollerArm", Kp, Ki, Kd, Kf);
@@ -75,6 +95,37 @@ public class TopRollerArm extends PIDSubsystem {
         setDefaultCommand(new TopRollerArmDoNothing());
     }
     
+    public void setState (State state) {
+        currentState = state;
+    }
+    
+    public State setState () {
+        double currentPos = returnPIDInput();
+        if (currentPos < 0) {
+            // no reading, pot is offline
+            setState(State.kDanger);
+        } else if (currentPos <= 750 ) {
+            setState(State.kDanger);
+        } else if (currentPos >= 900) {
+            setState(State.kReady);
+        } else {
+            setState(State.kSafe);
+        }
+        return (currentState);
+    }
+    
+    public State getState () {
+        return currentState;
+    }    
+    
+    public void setCatapultState (Catapult.State state) {
+        this.catapultState = state;
+    }
+    
+    public double getCurrentOutput () {
+        return currentOutput;
+    }
+    
     public boolean isEnabled() {
         return enabled;
     }
@@ -88,6 +139,12 @@ public class TopRollerArm extends PIDSubsystem {
         }
     }
     
+    public void setManualPower (double p) {
+        manualPower = p * 0.7;
+        if (manualPower < 0.2) {
+            manualPower = 0.2;
+        }
+    }
     // speed input into setMotor
     //  postive value moves arm forward
     //  negative value moves arm backward
@@ -95,6 +152,14 @@ public class TopRollerArm extends PIDSubsystem {
         
         System.out.println("Calling setMotor: "+speed);
         currentOutput = speed;
+        if (setState().equals(State.kDanger)) {
+            if (!catapultState.equals(Catapult.State.kReady)) {
+                if (!catapultState.equals(Catapult.State.kOVERRIDE)) {
+                    off();
+                    return;
+                }
+            } 
+        }
         
         // should use limitswitch to stop the setting of the motor here
         
@@ -114,10 +179,12 @@ public class TopRollerArm extends PIDSubsystem {
             stop();
             
         } else {
+            double currentPos = returnPIDInput();
+            
             if (isEnabled()) {
                 // adjust motor speed to less than 0.5 once the arm
                 //   is within outer limits, i.e. 3 * targetTolerance
-                double currentPos = returnPIDInput();
+
                 if ((currentPos > outerlowerlimit) && (currentPos < outerupperlimit)) {
                     System.out.println("Within outer limits, slowing to 0.5");
                     if (speed > 0) {
@@ -127,6 +194,11 @@ public class TopRollerArm extends PIDSubsystem {
                     }
                 }
             }
+            
+            if ((speed < 0) && (currentPos < 80)) {
+                // pulling arm back and we should slow down before the hard stop
+                speed = minMotorPower;
+            }
             // physical positive value to topRollerArm.set pulls arm backwards
             // physical negative value to topRollerArm.set pushes arm forward
             if (speed == 0) {
@@ -134,7 +206,8 @@ public class TopRollerArm extends PIDSubsystem {
             } else {
                 setStopped(false);
             }
-            topRollerArm.set( -1 * 0.7 * speed); 
+            topRollerArm.set( -1 * manualPower * speed);
+            currentOutput = speed * -1 * manualPower;
         }
         
 //        updateStatus();
@@ -143,6 +216,7 @@ public class TopRollerArm extends PIDSubsystem {
     public void stop() {
         System.out.println("Called stop");
         topRollerArm.set(0);
+        currentOutput = 0;
         setStopped(true);
     }
 
@@ -160,6 +234,10 @@ public class TopRollerArm extends PIDSubsystem {
     
     public boolean isStopped() {
         return stopped;
+    }
+    
+    public double getArmPosition() {
+        return rollerArmPot.pidGet();
     }
     
     protected double returnPIDInput() {
@@ -201,6 +279,14 @@ public class TopRollerArm extends PIDSubsystem {
         } else if (currentPos > rollerArmSetPtStow) {
             goTo(rollerArmSetPtStow);
         }
+    }
+    
+    public void armDown() {
+        goTo(rollerArmSetPtDown);
+    }
+    
+    public void armIntake() {
+        goTo(rollerArmSetPtSuck);
     }
     
     // sets the setpoint and enable PID

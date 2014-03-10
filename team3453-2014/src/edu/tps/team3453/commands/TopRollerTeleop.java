@@ -7,6 +7,7 @@ package edu.tps.team3453.commands;
 
 import edu.tps.team3453.RobotMap;
 import edu.tps.team3453.RobotValues;
+import edu.wpi.first.wpilibj.DriverStationLCD;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.buttons.Button;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
@@ -22,6 +23,9 @@ public class TopRollerTeleop extends CommandBase {
     private Button bspit;
     private Button bSetPtAdvance;
     private Button bSetPtBackup;
+    private Button boverride;
+    private Button bFire1;
+    private Button bFire2;
     private double yVal;    
     private double tVal;
     private boolean rollerOn = false;
@@ -31,6 +35,7 @@ public class TopRollerTeleop extends CommandBase {
         // eg. requires(chassis);
         requires(topRoller);
         requires(topRollerArm);
+        requires(catapult);
         requires(rightJoystickToken);
     }
 
@@ -38,7 +43,10 @@ public class TopRollerTeleop extends CommandBase {
     protected void initialize() {
         stick = new Joystick(RobotMap.rightJoystick);
         bsuck = new JoystickButton (stick, RobotValues.bsuck);
-        bspit = new JoystickButton (stick, RobotValues.bspit);  
+        bspit = new JoystickButton (stick, RobotValues.bspit); 
+        boverride = new JoystickButton (stick, RobotValues.bArmCatapultOverRide);
+        bFire1 = new JoystickButton (stick, RobotValues.bCatapultFire1);
+        bFire2 = new JoystickButton (stick, RobotValues.bCatapultFire2);
         bSetPtAdvance = new JoystickButton (stick, RobotValues.bSetPtAdvance);
         bSetPtBackup = new JoystickButton (stick, RobotValues.bSetPtBackup);
         
@@ -51,6 +59,30 @@ public class TopRollerTeleop extends CommandBase {
         tVal = stick.getThrottle();
         
         boolean operatorControl = false;
+        
+        if (topRollerArm.isEnabled() && topRollerArm.isOnTarget()) {
+            System.out.println("TopRollerArm is onTarget");
+            topRollerArm.off();
+        }
+
+        // resolve conflict states
+        topRollerArm.setCatapultState(catapult.getState());
+        catapult.setRollerArmState(topRollerArm.setState());
+        
+        if (boverride.get()) {
+            catapult.requestOverride();
+            topRollerArm.setCatapultState(catapult.getState());
+        }
+        
+        if (bFire1.get() || bFire2.get()) {
+            catapult.requestFireState();
+        }
+        
+        catapult.dispatch();
+        
+        // Throttle reading is -1 on fulltop and +1 on fullbottom
+        //   have to invert and scale to 0-1 before sending to call
+        topRollerArm.setManualPower(((-1*stick.getZ()) +1 ) /2);
         
         if ((yVal >= .150) || (yVal <= -.150)) {
             // multiply the joystick position by -1 to reverse 
@@ -115,7 +147,8 @@ public class TopRollerTeleop extends CommandBase {
             }
         }
         
-        topRollerArm.updateStatus();
+        this.dispStatus();
+//        topRollerArm.updateStatus();
     }
 
     // Make this return true when this Command no longer needs to run execute()
@@ -131,5 +164,68 @@ public class TopRollerTeleop extends CommandBase {
     // Called when another command which requires one or more of the same
     // subsystems is scheduled to run
     protected void interrupted() {
+    }
+
+    public void dispStatus() {
+        String msg = "";
+        
+        msg += "Cat State: "+catapult.getState().value + "; ";
+        TopRollerTeleop.disp(1,msg);
+        msg = "Cat output: "+ catapult.getCurrentOutput();
+        TopRollerTeleop.disp(2,msg);
+        
+        if (catapult.isCatapultRemoved()) {
+            msg = "TCatapult Removed";
+            TopRollerTeleop.disp(3, msg);
+        } else {
+            msg = "Teleop Executing";
+            TopRollerTeleop.disp(3, msg);
+        }
+        
+        msg = "TopRollerArm Pos: "+topRollerArm.getArmPosition() + "; ";
+        TopRollerTeleop.disp(4,msg);
+        msg = "output: " + topRollerArm.getCurrentOutput() + "; ";
+        TopRollerTeleop.disp(5,msg);
+
+    }      
+    
+    protected void lcd_catapult (String msg) {
+        TopRollerTeleop.disp(1,msg);
+    }
+    
+    protected void lcd_topRollerArm (String msg) {
+        TopRollerTeleop.disp(3,msg);
+    }
+    
+    public static void disp(int line, String msg) {
+        DriverStationLCD.Line l;
+        switch (line)
+        {
+        case 1:
+        l = DriverStationLCD.Line.kUser2;
+        break;
+        case 2:
+        l = DriverStationLCD.Line.kUser3;
+        break;
+        case 3:
+        l = DriverStationLCD.Line.kUser4;
+        break;
+        case 4:
+        l = DriverStationLCD.Line.kUser5;
+        break;
+        case 5:
+        l = DriverStationLCD.Line.kUser6;
+        break;
+        case 6:
+        l = DriverStationLCD.Line.kMain6;
+        break;
+        default:
+        l = DriverStationLCD.Line.kUser2;
+        break;
+        }
+
+        DriverStationLCD.getInstance().println(l, 1, msg);
+        DriverStationLCD.getInstance().updateLCD();
+        
     }
 }

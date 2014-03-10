@@ -9,7 +9,10 @@ public class RobotValues {
     public static final int bsuck = 1,
                             bspit = 2,
                             bSetPtAdvance = 6,
-                            bSetPtBackup = 7;
+                            bSetPtBackup = 7,
+                            bArmCatapultOverRide = 3,
+                            bCatapultFire1 = 8,
+                            bCatapultFire2 = 9;
     
     //Values of angles for camera to turn towards
     public static final int cameraPanServoPyramidApproachAngle = 0,
