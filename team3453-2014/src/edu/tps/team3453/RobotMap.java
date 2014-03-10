@@ -36,13 +36,16 @@ public class RobotMap {
     // currently the forward limit
     public static final int limitSwitchTopRollerArmReach = 2;
     
-    public static final int limitSwitchCatapultLatch = 6;
-    public static final int limitSwitchCatapultDown = 7;
+    public static final int limitSwitchCatapultLatch = 5;
+    public static final int limitSwitchCatapultDown = 6;
+    public static final int limitSwitchCatapultGearbox = 7;
     
-    public static final int leftDriveEncoderA = 7;
-    public static final int leftDriveEncoderB = 8;
-    public static final int rightDriveEncoderA = 5;
-    public static final int rightDriveEncoderB = 6;
+    public static final int catapultRemoved = 9;
+    
+    public static final int leftDriveEncoderA = 11;
+    public static final int leftDriveEncoderB = 12;
+    public static final int rightDriveEncoderA = 13;
+    public static final int rightDriveEncoderB = 14;
     public static final int closeLidLimitSwitch = 1;
     public static final int openLidLimitSwitch = 2;
     //public static final int climberChassisExtendLimitSwitch = 3;

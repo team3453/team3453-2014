@@ -104,7 +104,7 @@ public class TopRollerArm extends PIDSubsystem {
         if (currentPos < 0) {
             // no reading, pot is offline
             setState(State.kDanger);
-        } else if (currentPos <= 350 ) {
+        } else if (currentPos <= 750 ) {
             setState(State.kDanger);
         } else if (currentPos >= 900) {
             setState(State.kReady);
@@ -120,6 +120,10 @@ public class TopRollerArm extends PIDSubsystem {
     
     public void setCatapultState (Catapult.State state) {
         this.catapultState = state;
+    }
+    
+    public double getCurrentOutput () {
+        return currentOutput;
     }
     
     public boolean isEnabled() {
@@ -152,6 +156,7 @@ public class TopRollerArm extends PIDSubsystem {
             if (!catapultState.equals(Catapult.State.kReady)) {
                 if (!catapultState.equals(Catapult.State.kOVERRIDE)) {
                     off();
+                    return;
                 }
             } 
         }
@@ -231,6 +236,10 @@ public class TopRollerArm extends PIDSubsystem {
         return stopped;
     }
     
+    public double getArmPosition() {
+        return rollerArmPot.pidGet();
+    }
+    
     protected double returnPIDInput() {
         return rollerArmPot.pidGet();
 //        throw new java.lang.UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -270,6 +279,14 @@ public class TopRollerArm extends PIDSubsystem {
         } else if (currentPos > rollerArmSetPtStow) {
             goTo(rollerArmSetPtStow);
         }
+    }
+    
+    public void armDown() {
+        goTo(rollerArmSetPtDown);
+    }
+    
+    public void armIntake() {
+        goTo(rollerArmSetPtSuck);
     }
     
     // sets the setpoint and enable PID

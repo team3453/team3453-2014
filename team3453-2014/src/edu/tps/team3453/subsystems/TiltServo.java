@@ -17,7 +17,7 @@ import edu.tps.team3453.commands.TiltServoDoNothing;
  * @author Madeline
  */
 public class TiltServo extends Subsystem {
-Servo servo = new Servo(RobotMap.tiltServoInput);
+Servo servo = new Servo(2,RobotMap.tiltServoInput);
     // Put methods for controlling this subsystem
     // here. Call these from Commands.
 

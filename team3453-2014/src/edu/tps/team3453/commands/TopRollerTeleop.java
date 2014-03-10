@@ -7,6 +7,7 @@ package edu.tps.team3453.commands;
 
 import edu.tps.team3453.RobotMap;
 import edu.tps.team3453.RobotValues;
+import edu.wpi.first.wpilibj.DriverStationLCD;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.buttons.Button;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
@@ -146,7 +147,8 @@ public class TopRollerTeleop extends CommandBase {
             }
         }
         
-        topRollerArm.updateStatus();
+        this.dispStatus();
+//        topRollerArm.updateStatus();
     }
 
     // Make this return true when this Command no longer needs to run execute()
@@ -162,5 +164,68 @@ public class TopRollerTeleop extends CommandBase {
     // Called when another command which requires one or more of the same
     // subsystems is scheduled to run
     protected void interrupted() {
+    }
+
+    public void dispStatus() {
+        String msg = "";
+        
+        msg += "Cat State: "+catapult.getState().value + "; ";
+        TopRollerTeleop.disp(1,msg);
+        msg = "Cat output: "+ catapult.getCurrentOutput();
+        TopRollerTeleop.disp(2,msg);
+        
+        if (catapult.isCatapultRemoved()) {
+            msg = "TCatapult Removed";
+            TopRollerTeleop.disp(3, msg);
+        } else {
+            msg = "Teleop Executing";
+            TopRollerTeleop.disp(3, msg);
+        }
+        
+        msg = "TopRollerArm Pos: "+topRollerArm.getArmPosition() + "; ";
+        TopRollerTeleop.disp(4,msg);
+        msg = "output: " + topRollerArm.getCurrentOutput() + "; ";
+        TopRollerTeleop.disp(5,msg);
+
+    }      
+    
+    protected void lcd_catapult (String msg) {
+        TopRollerTeleop.disp(1,msg);
+    }
+    
+    protected void lcd_topRollerArm (String msg) {
+        TopRollerTeleop.disp(3,msg);
+    }
+    
+    public static void disp(int line, String msg) {
+        DriverStationLCD.Line l;
+        switch (line)
+        {
+        case 1:
+        l = DriverStationLCD.Line.kUser2;
+        break;
+        case 2:
+        l = DriverStationLCD.Line.kUser3;
+        break;
+        case 3:
+        l = DriverStationLCD.Line.kUser4;
+        break;
+        case 4:
+        l = DriverStationLCD.Line.kUser5;
+        break;
+        case 5:
+        l = DriverStationLCD.Line.kUser6;
+        break;
+        case 6:
+        l = DriverStationLCD.Line.kMain6;
+        break;
+        default:
+        l = DriverStationLCD.Line.kUser2;
+        break;
+        }
+
+        DriverStationLCD.getInstance().println(l, 1, msg);
+        DriverStationLCD.getInstance().updateLCD();
+        
     }
 }

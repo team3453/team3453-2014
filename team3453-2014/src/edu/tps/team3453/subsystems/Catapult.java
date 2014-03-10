@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.command.PIDSubsystem;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -31,8 +32,13 @@ public class Catapult extends Subsystem {
     private boolean latched = false;
     private boolean geatboxlatch = false;
     private double manualPower = 0.7;
-    private final double maxPower = 0.5;
-    private final double minRunPower = 0.2;
+    private final double maxPower = 1.0;
+    private final double minRunPower = 0.8;
+    private final int fwdDir = 1;
+    private final int revDir = -1;
+    private Timer timer = new Timer();
+    private Timer postTimer = new Timer();
+    private boolean lightOn = false;
        
     // Put methods for controlling this subsystem
     // here. Call these from Commands.
@@ -40,25 +46,52 @@ public class Catapult extends Subsystem {
     private static final SpeedController catapultMotor2 = new Victor(RobotMap.catapultMotor2);
     private static final DigitalInput limitSwitchCatapultLatch = new DigitalInput(RobotMap.limitSwitchCatapultLatch);
     private static final DigitalInput limitSwitchCatapultDown = new DigitalInput(RobotMap.limitSwitchCatapultDown);
-    private static final Relay solenoid = new Relay(RobotMap.catapultSolenoid);
-    private static final Relay light = new Relay(RobotMap.lightSolenoid);
+    private static final DigitalInput limitSwitchCatapultGearbox = new DigitalInput(RobotMap.limitSwitchCatapultGearbox);
+    private static final DigitalInput catapultRemoved = new DigitalInput(RobotMap.catapultRemoved);
     
+    private static final Relay solenoid = new Relay(RobotMap.catapultSolenoid);
+    // catapult solenoid: pos: FiringLatch; neg: GearBox
+    private static final Relay light = new Relay(RobotMap.lightSolenoid);
+    // light Spike: pos: light
+      
     public static class State {
 
         public final int state;
+        public final String value;  
         static final int kSafety_val = 0;
         static final int kWinch_val = 1;
         static final int kReady_val = 2;
         static final int kFire_val = 3;
-        static final int kOVERRIDE_val = 9;
+        static final int kOVERRIDE_val = 10;
+        static final int kPOST_WINCH_val = 11;
+        static final int kPOST_FIRE_val = 12;
         public static final State kSafety = new State(kSafety_val);
         public static final State kWinch = new State(kWinch_val);
         public static final State kReady = new State(kReady_val);
         public static final State kFire = new State(kFire_val);
         public static final State kOVERRIDE = new State(kOVERRIDE_val);
+        public static final State kPOSTWINCH = new State(kPOST_WINCH_val);
+        public static final State kPOSTFIRE = new State(kPOST_FIRE_val);
 
         private State (int state) {
             this.state = state;
+            if (state == kSafety_val) {
+                value = "Safety";
+            } else if (state == kWinch_val) {
+                value = "Winch";
+            } else if (state == kReady_val) {
+                value = "Ready";
+            } else if (state == kFire_val) {
+                value = "Fire";
+            } else if (state == kOVERRIDE_val) {
+                value = "OVER RIDE";
+            } else if (state == kPOST_WINCH_val) {
+                value = "POST WINCH";
+            } else if (state == kPOST_FIRE_val) {
+                value = "POST FIRE";
+            } else {
+                value = "Invalid";
+            }
         }
     }
     
@@ -76,7 +109,7 @@ public class Catapult extends Subsystem {
         //setAbsoluteTolerance(new PIDController.AbsoluteTolerance(targetTolerance));
         solenoid.setDirection(Relay.Direction.kBoth);
         light.setDirection(Relay.Direction.kBoth);
-        
+               
         solenoid.set(Relay.Value.kOff);
         setState(State.kSafety);
     }    
@@ -94,8 +127,14 @@ public class Catapult extends Subsystem {
         }
     }
     
+    public double getCurrentOutput () {
+        return currentOutput;
+    }
+    
     public void setState (State state) {
         currentState = state;
+        lightOn();
+        System.out.println("Catapult setting State to: "+state.value);
     }
     
     public State getState () {
@@ -107,7 +146,13 @@ public class Catapult extends Subsystem {
     }
     
     public void dispatch() {
+        if (isCatapultRemoved()) {
+            setState(State.kOVERRIDE);
+            runLights();
+            return;
+        }
         State s = getState();
+        System.out.println("Catapult dispatch in State: "+s.value);
         if (s.equals(State.kSafety)) {
             runSafety();
         } else if ((s.equals(State.kWinch) || s.equals(State.kOVERRIDE))) {
@@ -116,7 +161,12 @@ public class Catapult extends Subsystem {
             runReady();
         } else if (s.equals(State.kFire)) {
             runFire();
+        } else if (s.equals(State.kPOSTWINCH)) {
+            runPOSTWINCH();
+        } else if (s.equals(State.kPOSTFIRE)) {
+            runPOSTFIRE();
         }
+        runLights();
     }
     
     private void runSafety() {
@@ -151,22 +201,35 @@ public class Catapult extends Subsystem {
         
         if (isLatched()) {
             latched = true;
-            setMotor(minRunPower);
+            setMotor(fwdDir * minRunPower);
             return;
         }
         if ((latched) && (!isLatched())) {
             if (isDown()) {
                 latched = false;
                 stop();
-                setState(State.kReady);
+                postTimer.reset();
+                postTimer.start();
+                solenoid.set(Relay.Value.kReverse);
+                setMotor(revDir * minRunPower);
+                setState(State.kPOSTWINCH);
             } else {
-                setMotor(minRunPower);
+                setMotor(fwdDir * minRunPower);
             }
             return;
         } else {
-            setMotor(maxPower);
+            setMotor(fwdDir * maxPower);
         }
         
+    }
+    
+    private void runPOSTWINCH() {
+        // Wait 0.1 seconds for the catapult arm gearbox to free itself from the shifter
+        if ((postTimer.get() > 0.100) || limitSwitchCatapultGearbox.get()) {
+            stop();
+            postTimer.stop();
+            setState(State.kReady);
+        }
     }
     
     private void runReady() {
@@ -189,9 +252,19 @@ public class Catapult extends Subsystem {
             }
         } else {
             solenoid.set(Relay.Value.kReverse);
-            setState(State.kSafety);
+            setState(State.kPOSTFIRE);
+            postTimer.reset();
+            postTimer.start();
             return;
         }        
+    }
+    
+    private void runPOSTFIRE() {
+        // Wait 2.5 seconds for the catapult arm to settle
+        if (postTimer.get() > 2.500) {
+            setState(State.kSafety);
+            postTimer.stop();
+        }
     }
     
     public void requestFireState() {
@@ -203,6 +276,66 @@ public class Catapult extends Subsystem {
     
     public void requestOverride() {
         setState(State.kOVERRIDE);
+    }
+
+    public void runLights() {
+        State s = getState();
+        System.out.println("Catapult runLights State to: "+s.value + " ; Timer: " + timer.get() );
+        if (s.equals(State.kSafety)) {
+            if (isLightOn()) {
+                if (timer.get() > 0.250) {
+                    lightOff();
+                }
+            } else {
+                if (timer.get() > 1.000) {
+                    lightOn();
+                }
+            }            
+        }
+        if ((s.equals(State.kWinch)) || (s.equals(State.kPOSTWINCH))) {
+            if (isLightOn()) {
+                if (timer.get() > 0.550) {
+                    lightOff();
+                }
+            } else {
+                if (timer.get() > 0.550) {
+                    lightOn();
+                }
+            }           
+        }
+        if (s.equals(State.kReady)) {
+            if (isLightOn()) {
+                if (timer.get() > 1.000) {
+                    lightOff();
+                }
+            } else {
+                if (timer.get() > 0.250) {
+                    lightOn();
+                }
+            }
+        }
+        if ((s.equals(State.kFire) || s.equals(State.kPOSTFIRE))) {
+            if (isLightOn()) {
+                if (timer.get() > 3.000) {
+                    lightOff();
+                }
+            } else {
+                if (timer.get() > 0.250) {
+                    lightOn();
+                }
+            }
+        }
+        if (s.equals(State.kOVERRIDE)) {
+            if (isLightOn()) {
+                if (timer.get() > 0.250) {
+                    lightOff();
+                }
+            } else {
+                if (timer.get() > 0.250) {
+                    lightOn();
+                }
+            }
+        }
     }
     
     // speed input into setMotor
@@ -222,19 +355,40 @@ public class Catapult extends Subsystem {
             stop();
             
         } else {
-            catapultMotor1.set( -1 * manualPower * speed);
-            catapultMotor2.set( -1 * manualPower * speed);
-            currentOutput = speed * -1 * manualPower;
+            catapultMotor1.set( manualPower * speed);
+            catapultMotor2.set( manualPower * speed);
+            currentOutput = speed * manualPower;
         }
         
 //        updateStatus();
     }
     
     public boolean isDown() {
-        return (limitSwitchCatapultDown.get());
+        // Down limit switch is Normally Open
+        return (!limitSwitchCatapultDown.get());
     }
     public boolean isLatched() {
         return (limitSwitchCatapultLatch.get());
+    }
+    
+    public boolean isCatapultRemoved() {
+        return (catapultRemoved.get());
+    }
+    
+    public void lightOn() {
+        light.set(Relay.Value.kForward);
+        lightOn = true;
+        timer.reset();
+        timer.start();
+    }
+    public void lightOff() {
+        light.set(Relay.Value.kOff);
+        lightOn = false;
+        timer.reset();
+        timer.start();
+    }
+    public boolean isLightOn() {
+        return (lightOn);
     }
     
     public void stop() {

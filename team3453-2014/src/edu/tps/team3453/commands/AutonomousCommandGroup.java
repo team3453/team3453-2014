@@ -32,5 +32,6 @@ public class AutonomousCommandGroup extends CommandGroup {
         addParallel(new LEDLightStripOn());
         addSequential(new AutonomousDrive(-14400));
         addSequential(new AutonomousDrive(-14400));
+        addSequential(new AutonomousMechanism());
     }
 }
