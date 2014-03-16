@@ -31,13 +31,17 @@ public class Catapult extends Subsystem {
     private boolean stopped = true;
     private boolean latched = false;
     private boolean geatboxlatch = false;
-    private double manualPower = 0.7;
-    private final double maxPower = 1.0;
-    private final double minRunPower = 0.8;
-    private final int fwdDir = 1;
-    private final int revDir = -1;
+    private double manualPower = 1.0;
+    private final double maxPower = 1.00;
+    private final double minRunPower = 0.50;
+    private final int fwdDir = -1;
+    private final int revDir = 1;
     private Timer timer = new Timer();
     private Timer postTimer = new Timer();
+    private Timer catTimer = new Timer();
+    private Timer fireTimer = new Timer();
+    // rattles the firing pin a bit to make sure it's not sticking while we fire
+    private boolean fireRattle = false;
     private boolean lightOn = false;
        
     // Put methods for controlling this subsystem
@@ -135,6 +139,11 @@ public class Catapult extends Subsystem {
         currentState = state;
         lightOn();
         System.out.println("Catapult setting State to: "+state.value);
+        if (state.equals(State.kWinch)) {
+            catTimer.stop();
+            catTimer.reset();
+            catTimer.start();
+        }
     }
     
     public State getState () {
@@ -147,6 +156,7 @@ public class Catapult extends Subsystem {
     
     public void dispatch() {
         if (isCatapultRemoved()) {
+            stop();
             setState(State.kOVERRIDE);
             runLights();
             return;
@@ -187,7 +197,14 @@ public class Catapult extends Subsystem {
         
         if (isDown()) {
             stop();
-            setState(State.kReady);
+//            setState(State.kReady);
+            latched = false;
+            stop();
+            postTimer.reset();
+            postTimer.start();
+            solenoid.set(Relay.Value.kReverse);
+            setState(State.kPOSTWINCH);
+            setMotor(revDir * 1.0);
             return;
         }        
         
@@ -198,7 +215,7 @@ public class Catapult extends Subsystem {
                 return;
             }
         }
-        
+               
         if (isLatched()) {
             latched = true;
             setMotor(fwdDir * minRunPower);
@@ -218,14 +235,19 @@ public class Catapult extends Subsystem {
             }
             return;
         } else {
-            setMotor(fwdDir * maxPower);
-        }
+//            if (catTimer.get() > 1.30) {
+                setMotor(fwdDir * maxPower);
+//            } else {
+//                setMotor(fwdDir * this.minRunPower);
+            }
+//        }
         
     }
     
     private void runPOSTWINCH() {
         // Wait 0.1 seconds for the catapult arm gearbox to free itself from the shifter
-        if ((postTimer.get() > 0.100) || limitSwitchCatapultGearbox.get()) {
+        if ((postTimer.get() > 0.350) || limitSwitchCatapultGearbox.get()) {
+//       if ((postTimer.get() > 3.650)) {
             stop();
             postTimer.stop();
             setState(State.kReady);
@@ -247,7 +269,22 @@ public class Catapult extends Subsystem {
                 // can't fire right now, arm is in the way
                 setState(State.kReady);
             } else {
-                solenoid.set(Relay.Value.kOn);
+                // cycle thru the firing pin until the catapult releases
+                if (fireTimer.get()> 0.050) {
+                    if (fireRattle) {
+                        fireRattle = false;
+                    } else {
+                        fireRattle = true;
+                    }
+                    fireTimer.stop();
+                    fireTimer.reset();
+                    fireTimer.start();
+                }
+                if (fireRattle) {
+                    solenoid.set(Relay.Value.kReverse);
+                } else {
+                    solenoid.set(Relay.Value.kOn);         
+                }
                 return;
             }
         } else {
@@ -270,6 +307,9 @@ public class Catapult extends Subsystem {
     public void requestFireState() {
         if (getState().equals(State.kReady)) {
             setState(State.kFire);
+            fireTimer.stop();
+            fireTimer.reset();
+            fireTimer.start();
             return;
         }
     }
@@ -294,18 +334,18 @@ public class Catapult extends Subsystem {
         }
         if ((s.equals(State.kWinch)) || (s.equals(State.kPOSTWINCH))) {
             if (isLightOn()) {
-                if (timer.get() > 0.550) {
+                if (timer.get() > 0.350) {
                     lightOff();
                 }
             } else {
-                if (timer.get() > 0.550) {
+                if (timer.get() > 0.350) {
                     lightOn();
                 }
             }           
         }
         if (s.equals(State.kReady)) {
             if (isLightOn()) {
-                if (timer.get() > 1.000) {
+                if (timer.get() > 2.000) {
                     lightOff();
                 }
             } else {
@@ -327,11 +367,11 @@ public class Catapult extends Subsystem {
         }
         if (s.equals(State.kOVERRIDE)) {
             if (isLightOn()) {
-                if (timer.get() > 0.250) {
+                if (timer.get() > 0.150) {
                     lightOff();
                 }
             } else {
-                if (timer.get() > 0.250) {
+                if (timer.get() > 0.150) {
                     lightOn();
                 }
             }
@@ -348,7 +388,7 @@ public class Catapult extends Subsystem {
         
         // should use limitswitch to stop the setting of the motor here
         
-        if ((speed != 0) && (isDown())) {
+        if (((speed != 0) && (isDown())) && !(this.getState().equals(State.kPOSTWINCH))) {
             // pushing on the joystick and reached limit
             System.out.println("Catapult Hit Stop limit");
             
