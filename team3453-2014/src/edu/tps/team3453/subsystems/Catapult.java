@@ -43,6 +43,8 @@ public class Catapult extends Subsystem {
     // rattles the firing pin a bit to make sure it's not sticking while we fire
     private boolean fireRattle = false;
     private boolean lightOn = false;
+    private boolean downOverRide = false;
+    private boolean donePostWinchWait = false;
        
     // Put methods for controlling this subsystem
     // here. Call these from Commands.
@@ -124,6 +126,12 @@ public class Catapult extends Subsystem {
         setDefaultCommand(new CatapultDoNothing());
     }
      
+    public void initSubSystem() {
+        stop();
+        solenoid.set(Relay.Value.kOff);
+        setState(State.kSafety);
+    }
+    
     public void setManualPower (double p) {
         manualPower = p * 0.7;
         if (manualPower < 0.2) {
@@ -139,10 +147,57 @@ public class Catapult extends Subsystem {
         currentState = state;
         lightOn();
         System.out.println("Catapult setting State to: "+state.value);
-        if (state.equals(State.kWinch)) {
+        if (state.equals(State.kReady)) {
+            stop();
+        }
+        if (state.equals(State.kSafety)) {
+            stop();
+            solenoid.set(Relay.Value.kOff);
+        }        
+        if ((state.equals(State.kWinch)) || (state.equals(State.kOVERRIDE))) {
+            stop();
+            solenoid.set(Relay.Value.kOff);
+            latched = false;
+            downOverRide = false;
             catTimer.stop();
             catTimer.reset();
             catTimer.start();
+        }
+        if (state.equals(State.kPOSTWINCH)) {
+            stop();
+            postTimer.stop();
+            postTimer.reset();
+            postTimer.start();
+            if (isDownOverRide()) {
+                donePostWinchWait = false;
+                catTimer.stop();
+                catTimer.reset();
+                catTimer.start();
+            } else {
+                solenoid.set(Relay.Value.kReverse);
+                setMotor(revDir * 1.0);
+            }
+        }
+        if (state.equals(State.kFire)) {
+            stop();
+            fireTimer.stop();
+            fireTimer.reset();
+            fireTimer.start();
+            fireRattle = true;
+            solenoid.set(Relay.Value.kReverse); 
+            if (isDownOverRide()) {
+                catTimer.stop();
+                catTimer.reset();
+                catTimer.start();                
+            }
+        }
+        if (state.equals(State.kPOSTFIRE)) {
+            stop();
+            downOverRide = false;
+            solenoid.set(Relay.Value.kReverse);
+            postTimer.stop();
+            postTimer.reset();
+            postTimer.start();
         }
     }
     
@@ -194,17 +249,20 @@ public class Catapult extends Subsystem {
     
     private void runWinch() {
         solenoid.set(Relay.Value.kOff);
-        
-        if (isDown()) {
+
+        // stop the winching if winching is more than 1.75s 
+        //      or if the catapult down limitswitch is set
+        if (isDown() || (catTimer.get() > 1.75)) {
             stop();
 //            setState(State.kReady);
             latched = false;
             stop();
-            postTimer.reset();
-            postTimer.start();
-            solenoid.set(Relay.Value.kReverse);
+            if (catTimer.get() > 1.75) {
+                downOverRide = true;
+            } else {
+                downOverRide = false;
+            }
             setState(State.kPOSTWINCH);
-            setMotor(revDir * 1.0);
             return;
         }        
         
@@ -225,32 +283,41 @@ public class Catapult extends Subsystem {
             if (isDown()) {
                 latched = false;
                 stop();
-                postTimer.reset();
-                postTimer.start();
-                solenoid.set(Relay.Value.kReverse);
-                setMotor(revDir * minRunPower);
                 setState(State.kPOSTWINCH);
             } else {
                 setMotor(fwdDir * minRunPower);
             }
             return;
         } else {
-//            if (catTimer.get() > 1.30) {
-                setMotor(fwdDir * maxPower);
-//            } else {
-//                setMotor(fwdDir * this.minRunPower);
-            }
-//        }
+            setMotor(fwdDir * maxPower);
+            
+        }
         
     }
     
     private void runPOSTWINCH() {
+        if (isDownOverRide() && !donePostWinchWait) {
+            // wait 1.5s for the catapult to unwind if it was unlatched.
+            if (catTimer.get() < 1.50) {
+                return;
+            } else {
+                donePostWinchWait = true;
+                catTimer.stop();
+                catTimer.reset();
+                postTimer.stop();
+                postTimer.reset();
+                postTimer.start();
+            }
+        }
         // Wait 0.1 seconds for the catapult arm gearbox to free itself from the shifter
         if ((postTimer.get() > 0.350) || limitSwitchCatapultGearbox.get()) {
 //       if ((postTimer.get() > 3.650)) {
             stop();
             postTimer.stop();
             setState(State.kReady);
+        } else {
+            solenoid.set(Relay.Value.kReverse);
+            setMotor(revDir * 1.0);
         }
     }
     
@@ -269,8 +336,17 @@ public class Catapult extends Subsystem {
                 // can't fire right now, arm is in the way
                 setState(State.kReady);
             } else {
-                // cycle thru the firing pin until the catapult releases
-                if (fireTimer.get()> 0.050) {
+                if (isDownOverRide()) {
+                    // if we had overrode the catapult down limitswitch
+                    //   wait for 0.50s and assume that catapult latch has released
+                    if (catTimer.get() > 0.50) {
+                        downOverRide = false;
+                        catTimer.stop();
+                        catTimer.reset();
+                    }
+                }
+                // cycle thru the firing pin every 0.050 second until the catapult releases
+                if (fireTimer.get() > 0.010) {
                     if (fireRattle) {
                         fireRattle = false;
                     } else {
@@ -281,24 +357,22 @@ public class Catapult extends Subsystem {
                     fireTimer.start();
                 }
                 if (fireRattle) {
-                    solenoid.set(Relay.Value.kReverse);
+                    solenoid.set(Relay.Value.kOn);
                 } else {
-                    solenoid.set(Relay.Value.kOn);         
+                    solenoid.set(Relay.Value.kReverse);         
                 }
                 return;
             }
         } else {
             solenoid.set(Relay.Value.kReverse);
             setState(State.kPOSTFIRE);
-            postTimer.reset();
-            postTimer.start();
             return;
         }        
     }
     
     private void runPOSTFIRE() {
         // Wait 2.5 seconds for the catapult arm to settle
-        if (postTimer.get() > 2.500) {
+        if (postTimer.get() > 1.500) {
             setState(State.kSafety);
             postTimer.stop();
         }
@@ -307,9 +381,6 @@ public class Catapult extends Subsystem {
     public void requestFireState() {
         if (getState().equals(State.kReady)) {
             setState(State.kFire);
-            fireTimer.stop();
-            fireTimer.reset();
-            fireTimer.start();
             return;
         }
     }
@@ -405,7 +476,13 @@ public class Catapult extends Subsystem {
     
     public boolean isDown() {
         // Down limit switch is Normally Open
+        if (isDownOverRide()) {
+            return true;
+        }
         return (!limitSwitchCatapultDown.get());
+    }
+    public boolean isDownOverRide() {
+        return downOverRide;
     }
     public boolean isLatched() {
         return (limitSwitchCatapultLatch.get());
