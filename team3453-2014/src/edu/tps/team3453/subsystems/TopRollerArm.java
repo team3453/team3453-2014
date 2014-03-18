@@ -80,10 +80,11 @@ public class TopRollerArm extends PIDSubsystem {
         // enable() - Enables the PID controller.
         //leftEncoder.setPIDSourceParameter(Encoder.PIDSourceParameter.kRate);
         
-        setEnabled(false);
+        off();
 
         setTheSetpoint(Ksetpoint);
 
+        setState();
         //this.getPIDController().setTolerance(new PIDController.AbsoluteTolerance(targetTolerance));
         //setAbsoluteTolerance(new PIDController.AbsoluteTolerance(targetTolerance));
         
@@ -94,6 +95,11 @@ public class TopRollerArm extends PIDSubsystem {
         //setDefaultCommand(new MySpecialCommand());
         setDefaultCommand(new TopRollerArmDoNothing());
     }
+    
+    public void initSubSystem() {
+        off();
+        setState();
+    }    
     
     public void setState (State state) {
         currentState = state;
