@@ -61,7 +61,9 @@ public class RobotMap {
     
     //relay
     public static final int catapultSolenoid = 1;
+    // catapult solenoid: pos: FiringLatch; neg: GearBox
     public static final int lightSolenoid = 2;
+    // light Spike: pos: light
     public static final int ledLighStrip = 6;
 
     

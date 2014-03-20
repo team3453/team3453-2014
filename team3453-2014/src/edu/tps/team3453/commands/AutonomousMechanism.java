@@ -109,22 +109,22 @@ public class AutonomousMechanism extends CommandBase {
     
     public void dispStatus() {
         String msg = "";
-        msg += "Cat State: "+catapult.getState().value + "; ";
+        msg += "Cat State: "+catapult.getState().value + ";            ";
         AutonomousMechanism.disp(1,msg);
-        msg = "Cat output: " + catapult.getCurrentOutput() + "; ";
+        msg = "Cat output: " + catapult.getCurrentOutput() + ";           ";
         AutonomousMechanism.disp(2,msg);
         
         if (catapult.isCatapultRemoved()) {
-            msg = "ACatapult Removed";
+            msg = "ACatapult Removed          ";
             AutonomousMechanism.disp(3, msg);
         } else {
-            msg = "Autonomous Executing";
+            msg = "Autonomous Executing          ";
             AutonomousMechanism.disp(3, msg);
         }
         
-        msg = "TopRollerArm Pos: "+topRollerArm.getArmPosition() + "; ";
+        msg = "TopRollerArm Pos: "+topRollerArm.getArmPosition() + ";           ";
         AutonomousMechanism.disp(4,msg);
-        msg = "output: " + topRollerArm.getCurrentOutput() + "; ";
+        msg = "output: " + topRollerArm.getCurrentOutput() + ";           ";
         AutonomousMechanism.disp(5,msg);
 
     }      
