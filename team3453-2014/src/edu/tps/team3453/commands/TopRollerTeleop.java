@@ -50,10 +50,6 @@ public class TopRollerTeleop extends CommandBase {
         bSetPtAdvance = new JoystickButton (stick, RobotValues.bSetPtAdvance);
         bSetPtBackup = new JoystickButton (stick, RobotValues.bSetPtBackup);
         
-        catapult.initSubSystem();
-        topRollerArm.initSubSystem();
-        topRoller.stop();
-        
         System.out.println("TopRollerTeleop is executing");
     }
 
@@ -173,25 +169,22 @@ public class TopRollerTeleop extends CommandBase {
     public void dispStatus() {
         String msg = "";
         
-        msg += "Cat State: "+catapult.getState().value + ";           ";
+        msg += "Cat State: "+catapult.getState().value + "; ";
         TopRollerTeleop.disp(1,msg);
-        msg = "Cat output: "+ catapult.getCurrentOutput() + "          ";
+        msg = "Cat output: "+ catapult.getCurrentOutput();
         TopRollerTeleop.disp(2,msg);
         
         if (catapult.isCatapultRemoved()) {
-            msg = "TCatapult Removed         ";
+            msg = "TCatapult Removed";
             TopRollerTeleop.disp(3, msg);
         } else {
-            msg = "Teleop Executing          ";
-            if (catapult.isDownOverRide()) {
-                msg = "Teleop: catLimitOvRide          ";
-            }
+            msg = "Teleop Executing";
             TopRollerTeleop.disp(3, msg);
         }
         
-        msg = "TopRollerArm Pos: "+topRollerArm.getArmPosition() + ";           ";
+        msg = "TopRollerArm Pos: "+topRollerArm.getArmPosition() + "; ";
         TopRollerTeleop.disp(4,msg);
-        msg = "output: " + topRollerArm.getCurrentOutput() + ";           ";
+        msg = "output: " + topRollerArm.getCurrentOutput() + "; ";
         TopRollerTeleop.disp(5,msg);
 
     }      
