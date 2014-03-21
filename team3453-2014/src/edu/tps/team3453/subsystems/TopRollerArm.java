@@ -43,9 +43,10 @@ public class TopRollerArm extends PIDSubsystem {
     private final double minMotorPower = 0.3;
     
     private final double rollerArmSetPtStow = 43.0;
+    private final double rollerArmSetPtHardRearLimit = 20;
     private final double rollerArmSetPtUpRight = 285.0;
     private final double rollerArmSetPtSuck = 550.0;
-    private final double rollerArmSetPtDown = 970.0;
+    private final double rollerArmSetPtDown = 445.0;
     
     // Put methods for controlling this subsystem
     // here. Call these from Commands.
@@ -110,10 +111,12 @@ public class TopRollerArm extends PIDSubsystem {
         if (currentPos < 0) {
             // no reading, pot is offline
             setState(State.kDanger);
-        } else if (currentPos <= 750 ) {
+        } else if (currentPos <= 440 ) {
             setState(State.kDanger);
-        } else if (currentPos >= 900) {
-            setState(State.kReady);
+        } else if (currentPos >= 750 ) {
+            setState(State.kDanger);
+//        } else if (currentPos >= 900) {
+//            setState(State.kReady);
         } else {
             setState(State.kSafe);
         }
@@ -162,6 +165,9 @@ public class TopRollerArm extends PIDSubsystem {
             if (!catapultState.equals(Catapult.State.kReady)) {
                 if (!catapultState.equals(Catapult.State.kOVERRIDE)) {
                     off();
+                    speed = 0;
+                    topRollerArm.set( -1 * manualPower * speed);
+                    currentOutput = speed * -1 * manualPower;
                     return;
                 }
             } 
@@ -172,6 +178,7 @@ public class TopRollerArm extends PIDSubsystem {
         if (isEnabled() && isOnTarget()) {
             System.out.println("We are onTarget");
             off();
+            speed = 0;
         }
 
         if ((speed < 0) && (limitSwitchTopRollerArmPull.get())) {
@@ -201,9 +208,12 @@ public class TopRollerArm extends PIDSubsystem {
                 }
             }
             
-            if ((speed < 0) && (currentPos < 80)) {
+            if ((speed < 0) && (currentPos < rollerArmSetPtHardRearLimit)) {
                 // pulling arm back and we should slow down before the hard stop
-                speed = minMotorPower;
+                // 100 is a software hard-limit for pulling back
+                speed = 0;
+                off();
+//                speed = minMotorPower;
             }
             // physical positive value to topRollerArm.set pulls arm backwards
             // physical negative value to topRollerArm.set pushes arm forward

@@ -1,4 +1,4 @@
-/*
+    /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -8,6 +8,7 @@ package edu.tps.team3453.commands;
 import edu.tps.team3453.RobotMap;
 import edu.tps.team3453.RobotValues;
 import edu.tps.team3453.subsystems.Catapult;
+import edu.tps.team3453.subsystems.TopRollerArm;
 import edu.wpi.first.wpilibj.DriverStationLCD;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.buttons.Button;
@@ -44,6 +45,7 @@ public class AutonomousMechanism extends CommandBase {
         topRollerArm.setCatapultState(catapult.getState());
         catapult.setRollerArmState(topRollerArm.setState());
         
+        catapult.dispatch();
         topRollerArm.armDown();
         
         System.out.println("AutonomousMechanism is executing");
@@ -51,31 +53,49 @@ public class AutonomousMechanism extends CommandBase {
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
+
+        topRollerArm.setCatapultState(catapult.getState());
+        catapult.setRollerArmState(topRollerArm.setState());
         
         // run the topRollerArm until we are onTarget
-        if (topRollerArm.isEnabled() && topRollerArm.isOnTarget()) {
+/**        if (topRollerArm.isEnabled() && topRollerArm.isOnTarget()) {
             System.out.println("AutonomousMechanism: TopRollerArm is onTarget at Down");
             topRollerArm.off();
+            topRollerArm.setMotor(0.0);
             isArmDone = true;
+        }  */
+        
+        if (topRollerArm.setState().equals(TopRollerArm.State.kSafe)) {
+            System.out.println("AutonomousMechanism: TopRollerArm is onTarget at Down");
+            topRollerArm.off();
+            topRollerArm.setMotor(0.0);
+            isArmDone = true;              
         }
         
         // now request the catapult to fire
         if ((isArmDone) && (!requestFire)) {
             System.out.println("AutonomousMechanism: Request Catapult Fire");
+
             catapult.requestFireState();
-            requestFire = true;
+            if (catapult.getState().equals(Catapult.State.kFire)) {
+                topRoller.setMotor(1.0);
+                requestFire = true;
+            }
+
         }
         
         // wait until the catapult arm is winched to the kReady state again
         if ((isArmDone) && (requestFire)) {
             if ((!isArmIntake) && (catapult.getState().equals(Catapult.State.kWinch))) {
                 System.out.println("AutonomousMechanism: TopRollerArm is going to InTake");
+                topRoller.setMotor(0.0);
                 isArmIntake = true;
                 topRollerArm.armIntake();
             }
             if (topRollerArm.isEnabled() && topRollerArm.isOnTarget()) {
                 System.out.println("AutonomousMechanism: TopRollerArm is onTarget at InTake");
                 topRollerArm.off();
+                topRollerArm.setMotor(0.0);
             }
             if (catapult.getState().equals(Catapult.State.kReady)) {
                 System.out.println("AutonomousMechanism: isDone");
@@ -89,6 +109,7 @@ public class AutonomousMechanism extends CommandBase {
         
         catapult.dispatch();
         
+        this.dispStatus();
 //        topRollerArm.updateStatus();
     }
 
@@ -99,12 +120,32 @@ public class AutonomousMechanism extends CommandBase {
 
     // Called once after isFinished returns true
     protected void end() {
+        isArmDone = false;
+        isDone = false;
+        requestFire = false;
+        isArmIntake = false;
+        topRollerArm.off();
+        topRoller.setMotor(0.0);
+        topRollerArm.setMotor(0.0);
+        catapult.initSubSystem();
+        topRollerArm.initSubSystem();
+        topRoller.stop();        
         System.out.println("AutonomousMechanism is finished");
     }
 
     // Called when another command which requires one or more of the same
     // subsystems is scheduled to run
     protected void interrupted() {
+        isArmDone = false;
+        isDone = false;
+        requestFire = false;
+        isArmIntake = false;
+        topRollerArm.off();
+        topRoller.setMotor(0.0);
+        topRollerArm.setMotor(0.0);
+        catapult.initSubSystem();
+        topRollerArm.initSubSystem();
+        topRoller.stop();        
     }
     
     public void dispStatus() {
