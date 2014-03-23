@@ -45,8 +45,8 @@ public class TopRollerArm extends PIDSubsystem {
     private final double rollerArmSetPtStow = 43.0;
     private final double rollerArmSetPtHardRearLimit = 20;
     private final double rollerArmSetPtUpRight = 285.0;
-    private final double rollerArmSetPtSuck = 550.0;
-    private final double rollerArmSetPtDown = 445.0;
+    private final double rollerArmSetPtSuck = 500.0;
+    private final double rollerArmSetPtDown = 610.0;
     
     // Put methods for controlling this subsystem
     // here. Call these from Commands.
@@ -111,9 +111,9 @@ public class TopRollerArm extends PIDSubsystem {
         if (currentPos < 0) {
             // no reading, pot is offline
             setState(State.kDanger);
-        } else if (currentPos <= 440 ) {
+        } else if (currentPos <= 435 ) {
             setState(State.kDanger);
-        } else if (currentPos >= 750 ) {
+        } else if (currentPos >= 790 ) {
             setState(State.kDanger);
 //        } else if (currentPos >= 900) {
 //            setState(State.kReady);

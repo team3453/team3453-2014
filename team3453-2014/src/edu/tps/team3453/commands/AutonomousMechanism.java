@@ -58,19 +58,20 @@ public class AutonomousMechanism extends CommandBase {
         catapult.setRollerArmState(topRollerArm.setState());
         
         // run the topRollerArm until we are onTarget
-/**        if (topRollerArm.isEnabled() && topRollerArm.isOnTarget()) {
+        if (topRollerArm.isEnabled() && topRollerArm.isOnTarget()) {
             System.out.println("AutonomousMechanism: TopRollerArm is onTarget at Down");
             topRollerArm.off();
             topRollerArm.setMotor(0.0);
             isArmDone = true;
-        }  */
+        }  
         
-        if (topRollerArm.setState().equals(TopRollerArm.State.kSafe)) {
+/*        if (topRollerArm.setState().equals(TopRollerArm.State.kSafe)) {
             System.out.println("AutonomousMechanism: TopRollerArm is onTarget at Down");
             topRollerArm.off();
             topRollerArm.setMotor(0.0);
             isArmDone = true;              
         }
+        */
         
         // now request the catapult to fire
         if ((isArmDone) && (!requestFire)) {
@@ -87,19 +88,24 @@ public class AutonomousMechanism extends CommandBase {
         // wait until the catapult arm is winched to the kReady state again
         if ((isArmDone) && (requestFire)) {
             if ((!isArmIntake) && (catapult.getState().equals(Catapult.State.kWinch))) {
-                System.out.println("AutonomousMechanism: TopRollerArm is going to InTake");
                 topRoller.setMotor(0.0);
-                isArmIntake = true;
-                topRollerArm.armIntake();
+//                isArmIntake = true;
+//                topRollerArm.armIntake();
+                
             }
             if (topRollerArm.isEnabled() && topRollerArm.isOnTarget()) {
                 System.out.println("AutonomousMechanism: TopRollerArm is onTarget at InTake");
                 topRollerArm.off();
                 topRollerArm.setMotor(0.0);
-            }
-            if (catapult.getState().equals(Catapult.State.kReady)) {
                 System.out.println("AutonomousMechanism: isDone");
                 isDone = true;
+            }
+            if ((!isArmIntake) && (catapult.getState().equals(Catapult.State.kReady))) {
+                System.out.println("AutonomousMechanism: TopRollerArm is going to InTake");                
+                topRollerArm.armIntake();
+                isArmIntake = true;
+//                System.out.println("AutonomousMechanism: isDone");
+//                isDone = true;
             }
         }
 
