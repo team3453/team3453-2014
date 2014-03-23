@@ -162,12 +162,18 @@ public class TopRollerTeleop extends CommandBase {
 
     // Called once after isFinished returns true
     protected void end() {
+        catapult.initSubSystem();
+        topRollerArm.initSubSystem();
+        topRoller.stop();
         System.out.println("TopRollerTeleop is finished");
     }
 
     // Called when another command which requires one or more of the same
     // subsystems is scheduled to run
     protected void interrupted() {
+        catapult.initSubSystem();
+        topRollerArm.initSubSystem();
+        topRoller.stop();        
     }
 
     public void dispStatus() {

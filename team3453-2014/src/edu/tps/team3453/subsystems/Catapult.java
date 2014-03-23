@@ -252,7 +252,7 @@ public class Catapult extends Subsystem {
 
         // stop the winching if winching is more than 1.75s 
         //      or if the catapult down limitswitch is set
-        if (isDown() || (catTimer.get() > 1.75)) {
+        if (isDown() || (catTimer.get() > 4.55)) {
             stop();
 //            setState(State.kReady);
             latched = false;
@@ -334,6 +334,7 @@ public class Catapult extends Subsystem {
         if (isDown()) {
             if (rollerArmState.equals(TopRollerArm.State.kDanger)) {
                 // can't fire right now, arm is in the way
+                System.out.println("Catapult: Arm is in kDanger state: ");
                 setState(State.kReady);
             } else {
                 if (isDownOverRide()) {
@@ -346,7 +347,7 @@ public class Catapult extends Subsystem {
                     }
                 }
                 // cycle thru the firing pin every 0.050 second until the catapult releases
-                if (fireTimer.get() > 0.010) {
+                if (fireTimer.get() > 0.050) {
                     if (fireRattle) {
                         fireRattle = false;
                     } else {
@@ -485,7 +486,8 @@ public class Catapult extends Subsystem {
         return downOverRide;
     }
     public boolean isLatched() {
-        return (limitSwitchCatapultLatch.get());
+//        return (limitSwitchCatapultLatch.get());
+        return false;
     }
     
     public boolean isCatapultRemoved() {
